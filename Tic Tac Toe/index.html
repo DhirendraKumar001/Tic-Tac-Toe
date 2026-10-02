@@ -7,10 +7,21 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
 <header class="top glass">
-  <div class="player glass" id="p0"><i class="dot d0"></i><span class="pname" id="n0"></span></div>
   <h1>XO</h1>
-  <div class="player glass" id="p1"><i class="dot d1"></i><span class="pname" id="n1"></span></div>
+  <p class="sub">Enter players' names</p>
+  <div class="players">
+    <label class="player glass" id="p0">
+      <span class="badge b0">X</span>
+      <input id="in0" maxlength="12" placeholder="Player 1 name" autocomplete="off" aria-label="Player 1 name">
+    </label>
+    <span class="vs">VS</span>
+    <label class="player glass" id="p1">
+      <span class="badge b1">O</span>
+      <input id="in1" maxlength="12" placeholder="Player 2 name" autocomplete="off" aria-label="Player 2 name">
+    </label>
+  </div>
 </header>
 
 <div class="stage">
@@ -29,20 +40,9 @@
   <div class="row">
     <button class="glass btn" id="again">New Round</button>
     <button class="glass btn" id="reset">Reset Scores</button>
-    <button class="glass btn" id="change">Change Players</button>
   </div>
 </div>
 
-<div class="overlay" id="overlay">
-  <div class="modal glass">
-    <h2>Enter Player Names</h2>
-    <label class="field"><i class="dot d0"></i>
-      <input id="in0" maxlength="12" placeholder="Player 1 name" autocomplete="off"></label>
-    <label class="field"><i class="dot d1"></i>
-      <input id="in1" maxlength="12" placeholder="Player 2 name" autocomplete="off"></label>
-    <button class="glass btn start" id="start">Start Game</button>
-  </div>
-</div>
 
 <script src="app.js"></script>
 </body>

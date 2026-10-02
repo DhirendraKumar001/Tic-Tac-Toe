@@ -15,16 +15,10 @@ const grid = $("grid");
 const line = $("line");
 const res = $("res");
 const board = $("board");
-const overlay = $("overlay");
 
 const panels = [
     $("p0"),
     $("p1")
-];
-
-const nameEls = [
-    $("n0"),
-    $("n1")
 ];
 
 const labels = [
@@ -41,12 +35,6 @@ const ins = [
     $("in0"),
     $("in1")
 ];
-
-const startBtn = $("start");
-const againBtn = $("again");
-const resetBtn = $("reset");
-const changeBtn = $("change");
-const drawScore = $("vd");
 
 let names = [
     "Player 1",
@@ -71,7 +59,11 @@ const cells = [...Array(9)].map((_, i) => {
     const cell = document.createElement("button");
 
     cell.className = "cell";
-    cell.setAttribute("aria-label", `Cell ${i + 1}`);
+
+    cell.setAttribute(
+        "aria-label",
+        `Cell ${i + 1}`
+    );
 
     cell.onclick = () => play(i);
 
@@ -87,7 +79,6 @@ function msg(text) {
 function renderNames() {
 
     names.forEach((name, i) => {
-        nameEls[i].textContent = name;
         labels[i].textContent = `${name} Wins`;
     });
 }
@@ -96,43 +87,17 @@ function renderScores() {
 
     vals[0].textContent = score[0];
     vals[1].textContent = score[1];
-    drawScore.textContent = score.d;
+
+    $("vd").textContent = score.d;
 }
 
-function openModal() {
+function readNames() {
 
-    clearTimeout(timer);
-
-    ins[0].value =
-        names[0] === "Player 1"
-            ? ""
-            : names[0];
-
-    ins[1].value =
-        names[1] === "Player 2"
-            ? ""
-            : names[1];
-
-    overlay.classList.remove("hide");
-
-    ins[0].focus();
-}
-
-function startGame() {
-
-    const player1 = ins[0].value.trim();
-    const player2 = ins[1].value.trim();
-
-    const newNames = [
-        player1 || "Player 1",
-        player2 || "Player 2"
-    ];
-
-    const changed =
-        newNames[0] !== names[0] ||
-        newNames[1] !== names[1];
-
-    names = newNames;
+    names = ins.map(
+        (input, i) =>
+            input.value.trim() ||
+            `Player ${i + 1}`
+    );
 
     if (
         names[0].toLowerCase() ===
@@ -141,38 +106,35 @@ function startGame() {
         names[1] += " (2)";
     }
 
-    overlay.classList.add("hide");
-
     renderNames();
 
-    if (changed) {
-        score[0] = 0;
-        score[1] = 0;
-        score.d = 0;
-        starter = 0;
-
-        renderScores();
+    if (!over) {
+        updateUI();
     }
-
-    newRound();
 }
-
-startBtn.onclick = startGame;
 
 ins.forEach((input, index) => {
 
-    input.addEventListener("keydown", event => {
+    input.addEventListener(
+        "input",
+        readNames
+    );
 
-        if (event.key !== "Enter") {
-            return;
-        }
+    input.addEventListener(
+        "keydown",
+        event => {
 
-        if (index === 0) {
-            ins[1].focus();
-        } else {
-            startGame();
+            if (event.key !== "Enter") {
+                return;
+            }
+
+            if (index === 0) {
+                ins[1].focus();
+            } else {
+                input.blur();
+            }
         }
-    });
+    );
 });
 
 function newRound() {
@@ -180,23 +142,25 @@ function newRound() {
     clearTimeout(timer);
 
     state = Array(9).fill(null);
+
     over = false;
+
     winPattern = null;
+
     turn = starter;
 
     cells.forEach(cell => {
 
         cell.className = "cell";
-        cell.textContent = "";
+
+        cell.innerHTML = "";
+
         cell.disabled = false;
     });
 
     line.classList.remove("show");
 
-    line.style.width = "";
-    line.style.left = "";
-    line.style.top = "";
-    line.style.transform = "";
+    line.style.width = "0px";
 
     updateUI();
 }
@@ -216,30 +180,36 @@ function updateUI() {
     }
 }
 
-function play(i) {
+function play(index) {
 
-    if (over || state[i] !== null) {
+    if (
+        over ||
+        state[index] !== null
+    ) {
         return;
     }
 
-    state[i] = turn;
+    state[index] = turn;
 
-    const cell = cells[i];
+    const cell = cells[index];
+
     const symbol = turn ? "O" : "X";
 
     const span = document.createElement("span");
 
     span.textContent = symbol;
 
-    cell.className = `cell ${turn ? "o" : "x"}`;
+    cell.className =
+        `cell ${turn ? "o" : "x"}`;
 
     cell.appendChild(span);
 
     cell.disabled = true;
 
     const winner = WINS.find(pattern =>
-        pattern.every(index =>
-            state[index] === turn
+        pattern.every(
+            position =>
+                state[position] === turn
         )
     );
 
@@ -248,11 +218,11 @@ function play(i) {
         return;
     }
 
-    const draw = state.every(
-        value => value !== null
-    );
-
-    if (draw) {
+    if (
+        state.every(
+            value => value !== null
+        )
+    ) {
         finish(null);
         return;
     }
@@ -265,6 +235,7 @@ function play(i) {
 function finish(winner) {
 
     over = true;
+
     winPattern = winner;
 
     cells.forEach(cell => {
@@ -283,9 +254,13 @@ function finish(winner) {
 
         score[turn]++;
 
-        msg(`🏆 ${names[turn]} wins!`);
+        msg(
+            `🏆 ${names[turn]} wins!`
+        );
 
-        drawLine();
+        requestAnimationFrame(() => {
+            requestAnimationFrame(drawLine);
+        });
 
     } else {
 
@@ -310,42 +285,60 @@ function drawLine() {
         return;
     }
 
-    const center = index => {
+    const first = cells[winPattern[0]];
+    const last = cells[winPattern[2]];
 
-        const cell = cells[index];
+    const boardRect =
+        grid.getBoundingClientRect();
 
-        return [
-            cell.offsetLeft +
-            cell.offsetWidth / 2,
+    const firstRect =
+        first.getBoundingClientRect();
 
-            cell.offsetTop +
-            cell.offsetHeight / 2
-        ];
-    };
+    const lastRect =
+        last.getBoundingClientRect();
 
-    const [x1, y1] = center(
-        winPattern[0]
-    );
+    const x1 =
+        firstRect.left +
+        firstRect.width / 2 -
+        boardRect.left;
 
-    const [x2, y2] = center(
-        winPattern[2]
-    );
+    const y1 =
+        firstRect.top +
+        firstRect.height / 2 -
+        boardRect.top;
 
-    const cellWidth =
-        cells[0].offsetWidth;
+    const x2 =
+        lastRect.left +
+        lastRect.width / 2 -
+        boardRect.left;
 
-    const length =
-        Math.hypot(
-            x2 - x1,
-            y2 - y1
-        ) +
-        cellWidth * 0.6;
+    const y2 =
+        lastRect.top +
+        lastRect.height / 2 -
+        boardRect.top;
+
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+
+    const distance =
+        Math.sqrt(
+            dx * dx +
+            dy * dy
+        );
 
     const angle =
-        Math.atan2(
-            y2 - y1,
-            x2 - x1
-        ) * 180 / Math.PI;
+        Math.atan2(dy, dx) *
+        180 /
+        Math.PI;
+
+    const extra =
+        Math.min(
+            boardRect.width,
+            boardRect.height
+        ) * 0.10;
+
+    const length =
+        distance + extra;
 
     const centerX =
         (x1 + x2) / 2;
@@ -353,23 +346,35 @@ function drawLine() {
     const centerY =
         (y1 + y2) / 2;
 
-    Object.assign(line.style, {
-        width: `${length}px`,
-        left: `${centerX - length / 2}px`,
-        top: `${centerY - 3.5}px`,
-        transform:
-            `translateZ(60px) rotate(${angle}deg)`
-    });
+    line.style.width =
+        `${length}px`;
+
+    line.style.left =
+        `${centerX - length / 2}px`;
+
+    line.style.top =
+        `${centerY - 3.5}px`;
+
+    line.style.transform =
+        `translateZ(70px) rotate(${angle}deg)`;
 
     line.classList.add("show");
 }
 
-window.addEventListener("resize", () => {
+window.addEventListener(
+    "resize",
+    () => {
 
-    if (over && winPattern) {
-        drawLine();
+        if (
+            over &&
+            winPattern
+        ) {
+            requestAnimationFrame(
+                drawLine
+            );
+        }
     }
-});
+);
 
 board.addEventListener(
     "pointermove",
@@ -380,11 +385,13 @@ board.addEventListener(
 
         const x =
             (event.clientX - rect.left) /
-            rect.width - 0.5;
+            rect.width -
+            0.5;
 
         const y =
             (event.clientY - rect.top) /
-            rect.height - 0.5;
+            rect.height -
+            0.5;
 
         board.style.setProperty(
             "--ry",
@@ -395,6 +402,15 @@ board.addEventListener(
             "--rx",
             `${10 - y * 14}deg`
         );
+
+        if (
+            over &&
+            winPattern
+        ) {
+            requestAnimationFrame(
+                drawLine
+            );
+        }
     }
 );
 
@@ -411,12 +427,24 @@ board.addEventListener(
             "--rx",
             "10deg"
         );
+
+        if (
+            over &&
+            winPattern
+        ) {
+            setTimeout(
+                drawLine,
+                150
+            );
+        }
     }
 );
 
-againBtn.onclick = newRound;
+$("again").onclick = () => {
+    newRound();
+};
 
-resetBtn.onclick = () => {
+$("reset").onclick = () => {
 
     score[0] = 0;
     score[1] = 0;
@@ -429,9 +457,8 @@ resetBtn.onclick = () => {
     newRound();
 };
 
-changeBtn.onclick = openModal;
+readNames();
 
-renderNames();
 renderScores();
+
 newRound();
-openModal();

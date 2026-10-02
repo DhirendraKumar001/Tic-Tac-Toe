@@ -1,38 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <title>Tic Tac Toe</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Glass Tic Tac Toe</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="n">
-        <div class="name"></div>
-        <h1>TIC TAC TOE</h1>
-        <div class="name"></div>
-    </div>
+<header class="top glass">
+  <div class="player glass" id="p0"><i class="dot d0"></i><span class="pname" id="n0"></span></div>
+  <h1>XO</h1>
+  <div class="player glass" id="p1"><i class="dot d1"></i><span class="pname" id="n1"></span></div>
+</header>
 
-    <div class="main">
-        <div main 1>
-            <div class="box" id="b1" type="button"><h1></h1></div>
-            <div class="box" id="b4" type="button"><h1></h1></div>
-            <div class="box" id="b7" type="button"><h1></h1></div>
-        </div>
-        <div main 2>
-            <div class="box" id="b2" type="button"><h1></h1></div>
-            <div class="box" id="b5" type="button"><h1></h1></div>
-            <div class="box" id="b8" type="button"><h1></h1></div>
-        </div>
-        <div main 3>
-            <div class="box" id="b3" type="button"><h1></h1></div>
-            <div class="box" id="b6" type="button"><h1></h1></div>
-            <div class="box" id="b9" type="button"><h1></h1></div>
-        </div>
-    </div>
+<div class="stage">
+  <main class="board glass" id="board">
+    <div class="grid" id="grid"><div class="line" id="line"></div></div>
+  </main>
+</div>
 
-    <div class="res" type="button"><p> DISPLAY WINNER</p></div>
-    
-    <script src="app.js"></script>
+<div class="bottom">
+  <div class="res glass" id="res"></div>
+  <div class="row">
+    <div class="glass score"><span id="l0"></span><b id="v0">0</b></div>
+    <div class="glass score"><span>Draws</span><b id="vd">0</b></div>
+    <div class="glass score"><span id="l1"></span><b id="v1">0</b></div>
+  </div>
+  <div class="row">
+    <button class="glass btn" id="again">New Round</button>
+    <button class="glass btn" id="reset">Reset Scores</button>
+    <button class="glass btn" id="change">Change Players</button>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal glass">
+    <h2>Enter Player Names</h2>
+    <label class="field"><i class="dot d0"></i>
+      <input id="in0" maxlength="12" placeholder="Player 1 name" autocomplete="off"></label>
+    <label class="field"><i class="dot d1"></i>
+      <input id="in1" maxlength="12" placeholder="Player 2 name" autocomplete="off"></label>
+    <button class="glass btn start" id="start">Start Game</button>
+  </div>
+</div>
+
+<script src="app.js"></script>
 </body>
 </html>

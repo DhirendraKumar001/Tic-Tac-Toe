@@ -1,22 +1,22 @@
-const b = document.querySelectorAll(".box");
-const n = document.querySelectorAll(".name");
-const res = document.querySelector(".res");
+const boxes = [
+    document.getElementById("b1"),
+    document.getElementById("b2"),
+    document.getElementById("b3"),
+    document.getElementById("b4"),
+    document.getElementById("b5"),
+    document.getElementById("b6"),
+    document.getElementById("b7"),
+    document.getElementById("b8"),
+    document.getElementById("b9")
+];
 
-console.dir(n);
+const result = document.querySelector(".res p");
 
-let p1 = prompt("Enter Player01 Name");
-let p2 = prompt("Enter Player02 Name");
-
-p1 = p1 || "Player 01";
-p2 = p2 || "Player 02";
-
-n[0].innerHTML = `<p>${p1}</p>`;
-n[1].innerHTML = `<p>${p2}</p>`;
-
-let ans = false; // false = X, true = O
+let board = ["", "", "", "", "", "", "", "",];
+let currentPlayer = "X";
 let gameOver = false;
 
-const winPatterns = [
+const winningPatterns = [
     [0, 1, 2],
     [3, 4, 5],
     [6, 7, 8],
@@ -27,106 +27,102 @@ const winPatterns = [
     [2, 4, 6]
 ];
 
-for (let i = 0; i < 9; i++) {
-
-    b[i].addEventListener("click", () => {
-
-
-        if (b[i].innerText !== "" || gameOver) {
+boxes.forEach((box, index) => {
+    box.addEventListener("click", () => {
+        if (board[index] !== "" || gameOver) {
             return;
         }
 
-        if (ans === false) {
+        board[index] = currentPlayer;
+        box.querySelector("h1").textContent = currentPlayer;
 
-            b[i].innerHTML = "<h1>X</h1>";
-            b[i].style.background = "red";
+        const winner = checkWinner();
 
-            ans = true;
-
-        } 
-        else {
-
-            b[i].innerHTML = "<h1>O</h1>";
-            b[i].style.background = "yellow";
-
-            ans = false;
+        if (winner) {
+            result.textContent = `${currentPlayer} WINS!`;
+            gameOver = true;
+            drawWinningLine(winner);
+            return;
         }
 
-        checkWinner();
-    });
-}
+        if (!board.includes("")) {
+            result.textContent = "DRAW!";
+            gameOver = true;
+            return;
+        }
 
+        currentPlayer = currentPlayer === "X" ? "O" : "X";
+        result.textContent = `${currentPlayer}'S TURN`;
+    });
+});
 
 function checkWinner() {
-
-    for (let pattern of winPatterns) {
-
-        let a = pattern[0];
-        let c = pattern[1];
-        let d = pattern[2];
-
-        let value1 = b[a].innerText;
-        let value2 = b[c].innerText;
-        let value3 = b[d].innerText;
+    for (const pattern of winningPatterns) {
+        const [a, b, c] = pattern;
 
         if (
-            value1 !== "" &&
-            value1 === value2 &&
-            value2 === value3
+            board[a] !== "" &&
+            board[a] === board[b] &&
+            board[a] === board[c]
         ) {
-
-            let winner;
-
-            if (value1 === "X") {
-                winner = p1;
-            } else {
-                winner = p2;
-            }
-
-            res.innerHTML = `<p><b>${winner} is Winner!</b></p>`;
-
-            gameOver = true;
-
-            // Restart after 2 seconds
-            setTimeout(restartGame, 2000);
-
-            return;
+            return pattern;
         }
     }
 
-    let allFilled = true;
+    return null;
+}
 
-    for (let box of b) {
+function drawWinningLine(pattern) {
+    boxes.forEach(box => {
+        box.classList.remove(
+            "winning",
+            "vertical",
+            "diagonal",
+            "diagonal-reverse"
+        );
+    });
 
-        if (box.innerText === "") {
-            allFilled = false;
-            break;
-        }
+    const [a, b, c] = pattern;
+
+    if (
+        (a === 0 && b === 1 && c === 2) ||
+        (a === 3 && b === 4 && c === 5) ||
+        (a === 6 && b === 7 && c === 8)
+    ) {
+        boxes[a].classList.add("winning");
     }
 
-    if (allFilled) {
+    if (
+        (a === 0 && b === 3 && c === 6) ||
+        (a === 1 && b === 4 && c === 7) ||
+        (a === 2 && b === 5 && c === 8)
+    ) {
+        boxes[a].classList.add("winning", "vertical");
+    }
 
-        res.innerHTML = "<p><b>Game Draw!</b></p>";
+    if (a === 0 && b === 4 && c === 8) {
+        boxes[a].classList.add("winning", "diagonal");
+    }
 
-        gameOver = true;
-
-        // Restart after 2 seconds
-        setTimeout(restartGame, 2000);
+    if (a === 2 && b === 4 && c === 6) {
+        boxes[a].classList.add("winning", "diagonal-reverse");
     }
 }
 
-
-function restartGame() {
-
-    for (let box of b) {
-
-        box.innerHTML = "";
-        box.style.background = "";
-    }
-
-    ans = false;
-
+document.querySelector(".res").addEventListener("click", () => {
+    board = ["", "", "", "", "", "", "", "",];
+    currentPlayer = "X";
     gameOver = false;
 
-    res.innerHTML = "<p><b>New Game!</b></p>";
-}
+    boxes.forEach(box => {
+        box.querySelector("h1").textContent = "";
+        box.classList.remove(
+            "winning",
+            "vertical",
+            "diagonal",
+            "diagonal-reverse"
+        );
+    });
+
+    result.textContent = "DISPLAY WINNER";
+});
